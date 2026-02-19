@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'ec2-agent/**'
+      - 'server-ec2/**'
       - '.github/workflows/ec2-deploy.yaml'
 
 jobs:
@@ -25,8 +25,8 @@ jobs:
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
-          context: ./ec2-agent
-          file: ./ec2-agent/Dockerfile
+          context: ./server-ec2
+          file: ./server-ec2/Dockerfile
           platforms: linux/amd64
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/greenbranch-ec2-agent:latest
