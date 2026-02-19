@@ -22,7 +22,7 @@ class GitService:
         """Return the filesystem path for a session's repo."""
         return os.path.join(self.base_path, session_id)
 
-    def clone_repo(self, repo_url: str, session_id: str, branch: str = "main") -> str:
+    def clone_repo(self, repo_url: str, session_id: str, branch: str = "main", github_token: str | None = None) -> str:
         """Clone a GitHub repo into /repos/{session_id}/.
 
         Returns the path to the cloned repo.
@@ -34,13 +34,23 @@ class GitService:
         if os.path.exists(repo_path):
             shutil.rmtree(repo_path)
 
+        # Use authenticated URL for private repos
+        clone_url = repo_url
+        if github_token and repo_url.startswith("https://"):
+            clone_url = repo_url.replace("https://", f"https://x-access-token:{github_token}@")
+
         try:
             logger.info(f"Cloning {repo_url} (branch: {branch}) → {repo_path}")
             Repo.clone_from(
-                repo_url,
+                clone_url,
                 repo_path,
                 branch=branch,
             )
+            # Reset remote URL to original (don't persist token)
+            if github_token and clone_url != repo_url:
+                repo = self._get_repo(repo_path)
+                repo.remote("origin").set_url(repo_url)
+
             logger.info(f"Clone successful: {repo_path}")
             return repo_path
         except Exception as e:
@@ -64,6 +74,7 @@ class GitService:
         file_path: str,
         commit_message: str,
         branch_name: str,
+        github_token: str | None = None,
     ) -> str:
         """Stage a file, commit, and push to remote.
 
@@ -79,10 +90,24 @@ class GitService:
         commit = repo.index.commit(commit_message)
         logger.info(f"Committed: {commit.hexsha[:8]} — {commit_message}")
 
-        # Push
+        # Set authenticated remote URL if token is provided
         origin = repo.remote("origin")
-        origin.push(branch_name)
-        logger.info(f"Pushed to {branch_name}")
+        if github_token:
+            original_url = origin.url
+            # Convert https://github.com/owner/repo.git → https://<token>@github.com/owner/repo.git
+            if original_url.startswith("https://"):
+                auth_url = original_url.replace("https://", f"https://x-access-token:{github_token}@")
+                origin.set_url(auth_url)
+                logger.info("Set authenticated remote URL for push")
+
+        # Push
+        try:
+            origin.push(branch_name)
+            logger.info(f"Pushed to {branch_name}")
+        finally:
+            # Reset URL back to original (don't persist token in repo config)
+            if github_token:
+                origin.set_url(original_url)
 
         return commit.hexsha
 

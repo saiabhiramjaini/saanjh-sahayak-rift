@@ -92,23 +92,23 @@ interface AgentRunResponse {
 
 const STAGE_ICONS: Record<string, React.ReactNode> = {
   create_session: <GitBranch className="h-4 w-4" />,
-  execute_tests:  <Play className="h-4 w-4" />,
-  fix_code:       <Cpu className="h-4 w-4" />,
-  commit_fix:     <Upload className="h-4 w-4" />,
+  execute_tests: <Play className="h-4 w-4" />,
+  fix_code: <Cpu className="h-4 w-4" />,
+  commit_fix: <Upload className="h-4 w-4" />,
 };
 
 const STAGE_COLORS: Record<string, string> = {
-  create_session: "text-blue-400 bg-blue-400/10 border-blue-400/30",
-  execute_tests:  "text-violet-400 bg-violet-400/10 border-violet-400/30",
-  fix_code:       "text-amber-400 bg-amber-400/10 border-amber-400/30",
-  commit_fix:     "text-emerald-400 bg-emerald-400/10 border-emerald-400/30",
+  create_session: "text-primary bg-primary/10 border-primary/30",
+  execute_tests: "text-violet-400 bg-violet-400/10 border-violet-400/30",
+  fix_code: "text-amber-400 bg-amber-400/10 border-amber-400/30",
+  commit_fix: "text-primary bg-primary/10 border-primary/30",
 };
 
 const STAGE_LABEL: Record<string, string> = {
   create_session: "Create Session",
-  execute_tests:  "Execute Tests",
-  fix_code:       "Fix Code (LLM)",
-  commit_fix:     "Commit Fix",
+  execute_tests: "Execute Tests",
+  fix_code: "Fix Code (LLM)",
+  commit_fix: "Commit Fix",
 };
 
 function formatMs(ms: number): string {
@@ -152,7 +152,7 @@ function TraceCard({ entry }: { entry: TraceEntry }) {
   const isError = entry.summary.startsWith("FAIL") || String(entry.response?.success) === "false";
 
   return (
-    <div className={`rounded-lg border bg-card overflow-hidden ${isError ? "border-red-500/30" : "border-border"}`}>
+    <div className={`rounded-lg border bg-card overflow-hidden ${isError ? "border-destructive/30" : "border-border"}`}>
       {/* Header row — always visible */}
       <button
         onClick={() => setOpen(!open)}
@@ -166,7 +166,7 @@ function TraceCard({ entry }: { entry: TraceEntry }) {
         </span>
 
         <div className="min-w-0 flex-1">
-          <p className={`truncate text-sm font-medium ${isError ? "text-red-400" : "text-foreground"}`}>
+          <p className={`truncate text-sm font-medium ${isError ? "text-destructive" : "text-foreground"}`}>
             {entry.summary}
           </p>
           <p className="mt-0.5 text-xs text-muted-foreground font-mono">
@@ -276,7 +276,7 @@ export default function DebugPage() {
       {/* Top bar */}
       <div className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur px-6 py-3 flex items-center gap-3">
         <Terminal className="h-5 w-5 text-primary" />
-        <span className="font-mono text-sm font-semibold">RIFT Debug Console</span>
+        <span className="font-mono text-sm font-semibold">GreenBranch Debug Console</span>
         <Badge variant="outline" className="ml-auto font-mono text-xs">
           {SERVER_URL}
         </Badge>
@@ -304,7 +304,7 @@ export default function DebugPage() {
             <div>
               <label className="mb-1.5 block text-xs text-muted-foreground">Team Name *</label>
               <Input
-                placeholder="RIFT TEAM"
+                placeholder="GreenBranch Team"
                 value={teamName}
                 onChange={(e) => setTeamName(e.target.value)}
                 disabled={running}
@@ -386,7 +386,7 @@ export default function DebugPage() {
 
         {/* ── Error ── */}
         {error && (
-          <div className="flex items-start gap-3 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
+          <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
             <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
             <pre className="whitespace-pre-wrap font-mono text-xs">{error}</pre>
           </div>
@@ -409,12 +409,12 @@ export default function DebugPage() {
           <div className="space-y-6">
 
             {/* Status banner */}
-            <div className={`flex items-center gap-3 rounded-xl border p-5 ${passed ? "border-emerald-500/30 bg-emerald-500/10" : "border-red-500/30 bg-red-500/10"}`}>
+            <div className={`flex items-center gap-3 rounded-xl border p-5 ${passed ? "border-primary/30 bg-primary/10" : "border-destructive/30 bg-destructive/10"}`}>
               {passed
-                ? <CheckCircle2 className="h-7 w-7 text-emerald-400 shrink-0" />
-                : <XCircle className="h-7 w-7 text-red-400 shrink-0" />}
+                ? <CheckCircle2 className="h-7 w-7 text-primary shrink-0" />
+                : <XCircle className="h-7 w-7 text-destructive shrink-0" />}
               <div>
-                <p className={`text-lg font-bold ${passed ? "text-emerald-400" : "text-red-400"}`}>
+                <p className={`text-lg font-bold ${passed ? "text-primary" : "text-destructive"}`}>
                   {result.run_summary.final_status}
                 </p>
                 <p className="text-sm text-muted-foreground">{result.message}</p>
@@ -452,8 +452,8 @@ export default function DebugPage() {
                 <div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
                   {[
                     { k: "Base", v: score.base_score, color: "text-foreground" },
-                    { k: "Speed Bonus", v: `+${score.speed_bonus}`, color: "text-emerald-400" },
-                    { k: "Efficiency Penalty", v: `-${score.efficiency_penalty}`, color: "text-red-400" },
+                    { k: "Speed Bonus", v: `+${score.speed_bonus}`, color: "text-primary" },
+                    { k: "Efficiency Penalty", v: `-${score.efficiency_penalty}`, color: "text-destructive" },
                     { k: "Final Score", v: score.final_score, color: "text-primary font-bold text-base" },
                   ].map(({ k, v, color }) => (
                     <div key={k} className="rounded-md border border-border bg-secondary/30 p-3 text-center">
@@ -480,10 +480,10 @@ export default function DebugPage() {
                 <div className="space-y-2">
                   {result.ci_timeline.map((entry) => (
                     <div key={entry.iteration} className="flex items-center gap-3 text-sm">
-                      <span className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-mono font-bold ${entry.status === "passed" ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"}`}>
+                      <span className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-mono font-bold ${entry.status === "passed" ? "bg-primary/20 text-primary" : "bg-destructive/20 text-destructive"}`}>
                         {entry.iteration}
                       </span>
-                      <span className={`w-16 text-xs font-semibold ${entry.status === "passed" ? "text-emerald-400" : "text-red-400"}`}>
+                      <span className={`w-16 text-xs font-semibold ${entry.status === "passed" ? "text-primary" : "text-destructive"}`}>
                         {entry.status.toUpperCase()}
                       </span>
                       <span className="text-xs text-muted-foreground">{entry.errors_count} error(s) · {entry.fixes_applied} fix(es)</span>
@@ -503,7 +503,7 @@ export default function DebugPage() {
                 <div className="space-y-2">
                   {result.fixes_applied.map((fix, i) => (
                     <div key={i} className="flex items-start gap-3 rounded-md border border-border bg-secondary/20 p-3">
-                      <span className={`mt-0.5 rounded-full px-2 py-0.5 text-xs font-semibold ${fix.status === "fixed" ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"}`}>
+                      <span className={`mt-0.5 rounded-full px-2 py-0.5 text-xs font-semibold ${fix.status === "fixed" ? "bg-primary/20 text-primary" : "bg-destructive/20 text-destructive"}`}>
                         {fix.status}
                       </span>
                       <div className="min-w-0 flex-1">
@@ -540,14 +540,14 @@ export default function DebugPage() {
             {/* Errors remaining */}
             {result.errors_remaining.length > 0 && (
               <div className="space-y-2">
-                <h3 className="flex items-center gap-2 text-sm font-semibold text-red-400">
+                <h3 className="flex items-center gap-2 text-sm font-semibold text-destructive">
                   <AlertTriangle className="h-4 w-4" />
                   Errors Remaining ({result.errors_remaining.length})
                 </h3>
                 {result.errors_remaining.map((e, i) => (
-                  <div key={i} className="rounded-md border border-red-500/20 bg-red-500/5 p-3 font-mono text-xs text-red-300">
+                  <div key={i} className="rounded-md border border-destructive/20 bg-destructive/5 p-3 font-mono text-xs text-destructive">
                     <p className="font-semibold">{String(e.error_type)} in {String(e.file)}{e.line ? `:${e.line}` : ""}</p>
-                    <p className="mt-1 text-red-300/70">{String(e.message)}</p>
+                    <p className="mt-1 text-destructive/70">{String(e.message)}</p>
                   </div>
                 ))}
               </div>

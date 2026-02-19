@@ -30,16 +30,19 @@ export function Header({ variant = "landing" }: HeaderProps) {
   const { data: session } = useSession();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full glass-nav">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-3">
-          <Image
-            src="/logo.png"
-            alt="GreenBranch"
-            width={32}
-            height={32}
-            className="h-8 w-8"
-          />
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="relative">
+            <Image
+              src="/logo.png"
+              alt="GreenBranch"
+              width={32}
+              height={32}
+              className="h-8 w-8 transition-transform duration-300 group-hover:scale-110"
+            />
+            <div className="absolute inset-0 rounded-full bg-primary/20 blur-md opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+          </div>
           <span className="text-lg font-semibold text-foreground">
             GreenBranch
           </span>
@@ -47,7 +50,7 @@ export function Header({ variant = "landing" }: HeaderProps) {
 
         <nav className="flex items-center gap-4">
           <Link href="/debug">
-            <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground">
+            <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all duration-300">
               <Terminal className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Debug</span>
             </Button>
@@ -57,7 +60,7 @@ export function Header({ variant = "landing" }: HeaderProps) {
               <Button
                 variant="default"
                 size="sm"
-                className="gap-2"
+                className="gap-2 rounded-lg"
               >
                 <GitHubIcon className="h-4 w-4" />
                 Sign in
@@ -72,22 +75,22 @@ export function Header({ variant = "landing" }: HeaderProps) {
                   variant="ghost"
                   className="relative h-9 w-9 rounded-full"
                 >
-                  <Avatar className="h-9 w-9 ring-2 ring-border">
+                  <Avatar className="h-9 w-9 ring-2 ring-primary/20 ring-offset-2 ring-offset-background transition-all duration-300 hover:ring-primary/40">
                     <AvatarImage
                       src={session.user?.image || ""}
                       alt={session.user?.name || "User"}
                     />
-                    <AvatarFallback className="bg-primary text-primary-foreground">
+                    <AvatarFallback className="bg-primary/10 text-primary">
                       {session.user?.name?.charAt(0).toUpperCase() || "U"}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <div className="flex items-center gap-2 p-2">
+              <DropdownMenuContent align="end" className="w-56 glass-card rounded-xl border-border/50">
+                <div className="flex items-center gap-2 p-3">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={session.user?.image || ""} />
-                    <AvatarFallback className="bg-primary text-primary-foreground">
+                    <AvatarFallback className="bg-primary/10 text-primary">
                       {session.user?.name?.charAt(0).toUpperCase() || "U"}
                     </AvatarFallback>
                   </Avatar>
@@ -100,14 +103,14 @@ export function Header({ variant = "landing" }: HeaderProps) {
                     </span>
                   </div>
                 </div>
-                <DropdownMenuSeparator />
+                <DropdownMenuSeparator className="bg-border/50" />
                 <DropdownMenuItem asChild>
                   <Link href="/dashboard" className="flex items-center gap-2">
                     <User className="h-4 w-4" />
                     Dashboard
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
+                <DropdownMenuSeparator className="bg-border/50" />
                 <DropdownMenuItem
                   onClick={() => signOut({ callbackUrl: "/" })}
                   className="flex items-center gap-2 text-destructive focus:text-destructive"

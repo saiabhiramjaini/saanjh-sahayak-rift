@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   ArrowRight,
   Play,
+  Sparkles,
 } from "lucide-react";
 
 function GitHubIcon({ className }: { className?: string }) {
@@ -28,26 +29,31 @@ const steps = [
     number: "01",
     title: "Connect Repository",
     description: "Link your GitHub repository with a single click.",
+    icon: GitBranch,
   },
   {
     number: "02",
     title: "Run Tests",
     description: "GreenBranch automatically runs your test suite.",
+    icon: Play,
   },
   {
     number: "03",
     title: "Detect Issues",
     description: "AI analyzes failures and identifies root causes.",
+    icon: Sparkles,
   },
   {
     number: "04",
     title: "Apply Fixes",
     description: "Automated fixes are committed to a new branch.",
+    icon: Zap,
   },
   {
     number: "05",
     title: "Verify Success",
     description: "Tests rerun until the pipeline turns green.",
+    icon: CheckCircle2,
   },
 ];
 
@@ -80,34 +86,48 @@ const features = [
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col bg-background aurora-bg">
       <Header variant="landing" />
 
       <main className="flex-1">
         {/* Hero Section */}
         <section className="relative overflow-hidden">
-          <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 sm:py-32 lg:px-8">
+          {/* Animated background orbs */}
+          <div className="absolute inset-0 -z-10 overflow-hidden">
+            <div className="absolute left-1/4 top-1/4 h-[500px] w-[500px] rounded-full bg-primary/8 blur-[120px] animate-float-slow" />
+            <div className="absolute right-1/4 top-1/3 h-[400px] w-[400px] rounded-full bg-primary/5 blur-[100px] animate-float" />
+            <div className="absolute left-1/2 bottom-0 h-[300px] w-[600px] -translate-x-1/2 rounded-full bg-primary/5 blur-[80px]" />
+          </div>
+
+          <div className="mx-auto max-w-7xl px-4 py-28 sm:px-6 sm:py-40 lg:px-8">
             <div className="mx-auto max-w-3xl text-center">
-              <div className="mb-8 flex justify-center">
-                <div className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary px-4 py-1.5 text-sm text-muted-foreground">
-                  <GitBranch className="h-4 w-4 text-primary" />
+              {/* Badge */}
+              <div className="mb-8 flex justify-center animate-fade-in-up">
+                <div className="inline-flex items-center gap-2.5 rounded-full border border-primary/20 bg-primary/5 px-5 py-2 text-sm text-primary backdrop-blur-sm">
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+                  </span>
                   Autonomous CI/CD Healing
                 </div>
               </div>
 
-              <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
-                Keep your CI pipelines{" "}
-                <span className="text-primary">green</span>
+              {/* Headline */}
+              <h1 className="text-5xl font-bold tracking-tight sm:text-7xl animate-fade-in-up stagger-1" style={{ opacity: 0 }}>
+                <span className="text-foreground">Keep your CI pipelines</span>{" "}
+                <span className="gradient-text">green</span>
               </h1>
 
-              <p className="mt-6 text-lg leading-8 text-muted-foreground">
+              {/* Subhead */}
+              <p className="mt-8 text-lg leading-8 text-muted-foreground/80 max-w-2xl mx-auto animate-fade-in-up stagger-2" style={{ opacity: 0 }}>
                 GreenBranch automatically detects, fixes, and verifies code
-                issues. Stop wasting time on broken builds.
+                issues. Stop wasting time on broken builds — let AI heal your pipelines.
               </p>
 
-              <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+              {/* CTA */}
+              <div className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row animate-fade-in-up stagger-3" style={{ opacity: 0 }}>
                 <Link href="/signin">
-                  <Button size="lg" className="w-full gap-2 sm:w-auto">
+                  <Button size="lg" className="w-full gap-2.5 sm:w-auto text-base px-8 py-6 rounded-xl animate-pulse-glow">
                     <GitHubIcon className="h-5 w-5" />
                     Sign in with GitHub
                   </Button>
@@ -115,50 +135,59 @@ export default function Home() {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="w-full gap-2 sm:w-auto"
+                  className="w-full gap-2.5 sm:w-auto text-base px-8 py-6 rounded-xl border-border/50 hover:border-primary/30 hover:bg-primary/5 transition-all duration-300"
                 >
                   <Play className="h-4 w-4" />
                   View Demo
                 </Button>
               </div>
-            </div>
-          </div>
 
-          {/* Background gradient */}
-          <div className="absolute inset-0 -z-10 overflow-hidden">
-            <div className="absolute left-1/2 top-0 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-3xl" />
+              {/* Floating feature pills */}
+              <div className="mt-16 flex flex-wrap items-center justify-center gap-3 animate-fade-in-up stagger-4" style={{ opacity: 0 }}>
+                {["Auto Fix", "Zero Config", "Branch Safe", "Real-time Logs"].map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-full border border-border/50 bg-card/50 px-4 py-1.5 text-xs text-muted-foreground backdrop-blur-sm transition-all duration-300 hover:border-primary/30 hover:text-primary"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
         </section>
 
         {/* How It Works Section */}
-        <section className="border-t border-border bg-secondary/30">
-          <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-2xl text-center">
-              <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                How it works
+        <section className="relative border-t border-border/50">
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.02] to-transparent" />
+          <div className="relative mx-auto max-w-7xl px-4 py-28 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-2xl text-center mb-20">
+              <h2 className="text-3xl font-bold tracking-tight sm:text-5xl">
+                <span className="text-foreground">How it </span>
+                <span className="gradient-text">works</span>
               </h2>
-              <p className="mt-4 text-muted-foreground">
+              <p className="mt-5 text-muted-foreground text-lg">
                 Five simple steps to automated CI healing
               </p>
             </div>
 
-            <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
               {steps.map((step, index) => (
-                <div key={step.number} className="relative">
-                  <div className="flex flex-col items-center text-center">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground font-mono text-sm font-semibold">
-                      {step.number}
+                <div key={step.number} className="relative group">
+                  <div className="glass-card rounded-2xl p-6 text-center h-full">
+                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 font-mono text-sm font-bold text-primary mb-5 transition-all duration-300 group-hover:scale-110 group-hover:bg-primary/15">
+                      <step.icon className="h-5 w-5" />
                     </div>
-                    <h3 className="mt-4 text-base font-semibold text-foreground">
+                    <h3 className="text-base font-semibold text-foreground mb-2">
                       {step.title}
                     </h3>
-                    <p className="mt-2 text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground leading-relaxed">
                       {step.description}
                     </p>
                   </div>
                   {index < steps.length - 1 && (
-                    <div className="absolute left-full top-6 hidden w-full -translate-x-1/2 lg:block">
-                      <ArrowRight className="mx-auto h-5 w-5 text-border" />
+                    <div className="absolute left-full top-1/2 hidden w-6 -translate-x-1/2 -translate-y-1/2 lg:flex items-center justify-center">
+                      <ArrowRight className="h-4 w-4 text-primary/30" />
                     </div>
                   )}
                 </div>
@@ -168,30 +197,32 @@ export default function Home() {
         </section>
 
         {/* Features Section */}
-        <section className="border-t border-border">
-          <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-2xl text-center">
-              <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                Why GreenBranch?
+        <section className="relative border-t border-border/50">
+          <div className="mx-auto max-w-7xl px-4 py-28 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-2xl text-center mb-20">
+              <h2 className="text-3xl font-bold tracking-tight sm:text-5xl">
+                <span className="text-foreground">Why </span>
+                <span className="gradient-text">GreenBranch</span>
+                <span className="text-foreground">?</span>
               </h2>
-              <p className="mt-4 text-muted-foreground">
+              <p className="mt-5 text-muted-foreground text-lg">
                 Built for developers who value their time
               </p>
             </div>
 
-            <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {features.map((feature) => (
                 <div
                   key={feature.title}
-                  className="group rounded-lg border border-border bg-card p-6 transition-colors hover:border-primary/50"
+                  className="glass-card group rounded-2xl p-7"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 border border-primary/15 transition-all duration-300 group-hover:scale-110 group-hover:bg-primary/15">
                     <feature.icon className="h-5 w-5 text-primary" />
                   </div>
-                  <h3 className="mt-4 text-base font-semibold text-foreground">
+                  <h3 className="mt-5 text-base font-semibold text-foreground">
                     {feature.title}
                   </h3>
-                  <p className="mt-2 text-sm text-muted-foreground">
+                  <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
                     {feature.description}
                   </p>
                 </div>
@@ -201,58 +232,52 @@ export default function Home() {
         </section>
 
         {/* Trust Section */}
-        <section className="border-t border-border bg-secondary/30">
-          <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
+        <section className="relative border-t border-border/50">
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-primary/[0.02]" />
+          <div className="relative mx-auto max-w-7xl px-4 py-28 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-3xl">
-              <div className="rounded-lg border border-border bg-card p-8">
-                <h2 className="text-xl font-semibold text-foreground">
-                  Safe by Design
-                </h2>
-                <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                  <div className="flex items-start gap-3">
-                    <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                    <div>
-                      <p className="font-medium text-foreground">
-                        Protected Main Branch
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        GreenBranch never edits your main branch directly
-                      </p>
-                    </div>
+              <div className="glass-card rounded-2xl p-10 glow-primary">
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 border border-primary/20">
+                    <Shield className="h-5 w-5 text-primary" />
                   </div>
-                  <div className="flex items-start gap-3">
-                    <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                    <div>
-                      <p className="font-medium text-foreground">
-                        Isolated Branches
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        All changes happen on a new dedicated branch
-                      </p>
+                  <h2 className="text-xl font-semibold text-foreground">
+                    Safe by Design
+                  </h2>
+                </div>
+                <div className="grid gap-5 sm:grid-cols-2">
+                  {[
+                    {
+                      title: "Protected Main Branch",
+                      desc: "GreenBranch never edits your main branch directly",
+                    },
+                    {
+                      title: "Isolated Branches",
+                      desc: "All changes happen on a new dedicated branch",
+                    },
+                    {
+                      title: "Commit History",
+                      desc: "Every fix is committed with clear messages",
+                    },
+                    {
+                      title: "Full Audit Log",
+                      desc: "All actions are logged and visible on dashboard",
+                    },
+                  ].map((item) => (
+                    <div key={item.title} className="flex items-start gap-3.5 group">
+                      <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 border border-primary/20 transition-colors group-hover:bg-primary/20">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-foreground">
+                          {item.title}
+                        </p>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {item.desc}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                    <div>
-                      <p className="font-medium text-foreground">
-                        Commit History
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Every fix is committed with clear messages
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                    <div>
-                      <p className="font-medium text-foreground">
-                        Full Audit Log
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        All actions are logged and visible on dashboard
-                      </p>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -260,18 +285,23 @@ export default function Home() {
         </section>
 
         {/* CTA Section */}
-        <section className="border-t border-border">
-          <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
+        <section className="relative border-t border-border/50">
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute left-1/2 bottom-0 h-[300px] w-[500px] -translate-x-1/2 rounded-full bg-primary/8 blur-[100px]" />
+          </div>
+          <div className="relative mx-auto max-w-7xl px-4 py-28 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-2xl text-center">
-              <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                Ready to go green?
+              <h2 className="text-3xl font-bold tracking-tight sm:text-5xl">
+                <span className="text-foreground">Ready to go </span>
+                <span className="gradient-text">green</span>
+                <span className="text-foreground">?</span>
               </h2>
-              <p className="mt-4 text-muted-foreground">
+              <p className="mt-5 text-muted-foreground text-lg">
                 Connect your repository and let GreenBranch handle the rest.
               </p>
-              <div className="mt-8">
+              <div className="mt-10">
                 <Link href="/signin">
-                  <Button size="lg" className="gap-2">
+                  <Button size="lg" className="gap-2.5 text-base px-10 py-6 rounded-xl animate-pulse-glow">
                     <GitHubIcon className="h-5 w-5" />
                     Get Started
                   </Button>
@@ -283,10 +313,10 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border">
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <footer className="border-t border-border/50">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               <Image
                 src="/logo.png"
                 alt="GreenBranch"
@@ -294,11 +324,11 @@ export default function Home() {
                 height={24}
                 className="h-6 w-6"
               />
-              <span className="text-sm text-muted-foreground">
+              <span className="text-sm font-medium text-muted-foreground">
                 GreenBranch
               </span>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground/60">
               Automatically detect, fix, and verify code issues to keep CI
               pipelines green.
             </p>

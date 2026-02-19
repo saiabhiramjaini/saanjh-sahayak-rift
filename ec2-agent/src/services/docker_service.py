@@ -2,6 +2,7 @@
 
 import logging
 import time
+from typing import Generator
 
 from src.app.config import api_settings
 from src.core.docker_manager import DockerManager
@@ -76,6 +77,49 @@ class DockerService:
 
         return exit_code, output_str
 
+    def exec_command_streaming(
+        self, language: str, command: str, workdir: str
+    ) -> Generator[str, None, tuple[int, str]]:
+        """Execute a command and yield output lines in real-time.
+
+        Yields each line as it is produced by the container.
+        After all lines are yielded, the full output and exit code
+        can be obtained from the generator's return value.
+        """
+        container_name = self.get_container_name(language)
+        container = self.docker_manager.get_container(container_name)
+
+        full_command = f"bash -c 'cd {workdir} && {command}'"
+        logger.info(f"[STREAM] Executing in {container_name}: {command[:100]}...")
+
+        # Use Docker SDK's exec_create + exec_start for streaming + exit code
+        exec_id = container.client.api.exec_create(
+            container.id, full_command, stdout=True, stderr=True
+        )
+        stream = container.client.api.exec_start(exec_id, stream=True)
+
+        all_output: list[str] = []
+        buffer = ""
+        for chunk in stream:
+            text = chunk.decode("utf-8", errors="replace")
+            buffer += text
+            while "\n" in buffer:
+                line, buffer = buffer.split("\n", 1)
+                all_output.append(line)
+                yield line
+        # Yield any remaining partial line
+        if buffer.strip():
+            all_output.append(buffer)
+            yield buffer
+
+        # Get the exit code
+        inspect = container.client.api.exec_inspect(exec_id)
+        exit_code = inspect.get("ExitCode", -1)
+        full_output = "\n".join(all_output)
+
+        logger.info(f"[STREAM] Command finished: exit_code={exit_code}, lines={len(all_output)}")
+        return exit_code, full_output
+
     def install_dependencies(
         self, language: str, repo_path: str, custom_command: str | None = None
     ) -> tuple[int, str]:
@@ -126,3 +170,31 @@ class DockerService:
 
         logger.info(f"Running tests at {repo_path}")
         return self.exec_command(language, test_cmd, repo_path)
+
+    def _resolve_command(
+        self, language: str, custom_command: str | None, command_map: dict[str, str], label: str
+    ) -> str:
+        """Resolve command from custom or defaults."""
+        if custom_command:
+            cmd = custom_command + " 2>&1"
+            logger.info(f"Using custom {label} command: {cmd[:100]}")
+            return cmd
+        cmd = command_map.get(language)
+        if cmd is None:
+            raise UnsupportedLanguageError(f"No {label} command for '{language}'")
+        logger.info(f"Using default {label} for {language}")
+        return cmd
+
+    def install_dependencies_streaming(
+        self, language: str, repo_path: str, custom_command: str | None = None
+    ) -> Generator[str, None, tuple[int, str]]:
+        """Install dependencies, yielding output lines in real-time."""
+        cmd = self._resolve_command(language, custom_command, self.INSTALL_COMMANDS, "install")
+        return self.exec_command_streaming(language, cmd, repo_path)
+
+    def run_tests_streaming(
+        self, language: str, repo_path: str, custom_command: str | None = None
+    ) -> Generator[str, None, tuple[int, str]]:
+        """Run tests, yielding output lines in real-time."""
+        cmd = self._resolve_command(language, custom_command, self.TEST_COMMANDS, "test")
+        return self.exec_command_streaming(language, cmd, repo_path)

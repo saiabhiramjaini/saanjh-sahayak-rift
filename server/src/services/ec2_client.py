@@ -3,6 +3,7 @@
 import json
 import logging
 import time
+from typing import Awaitable, Callable
 
 import httpx
 
@@ -125,6 +126,72 @@ class EC2Client:
         except httpx.ConnectError as e:
             raise EC2AgentUnreachable(str(e))
 
+    async def execute_tests_streaming(
+        self,
+        session_id: str,
+        install_command: str | None = None,
+        test_command: str | None = None,
+        branch: str = "main",
+        on_line: "Callable[[str, str], Awaitable[None]] | None" = None,
+    ) -> dict:
+        """POST /api/v1/execute/stream — run tests with real-time SSE streaming.
+
+        Args:
+            on_line: async callback(phase, line) called for each output line in real-time.
+
+        Returns:
+            The final structured test result dict (same shape as execute_tests).
+        """
+        payload: dict = {"session_id": session_id, "branch": branch}
+        if install_command:
+            payload["install_command"] = install_command
+        if test_command:
+            payload["test_command"] = test_command
+
+        url = f"{self.base_url}/api/v1/execute/stream"
+        _log_request("POST", url, payload=payload)
+
+        result: dict = {}
+
+        try:
+            async with httpx.AsyncClient(
+                base_url=self.base_url,
+                headers=self.headers,
+                timeout=300.0,
+            ) as client:
+                async with client.stream("POST", "/api/v1/execute/stream", json=payload) as response:
+                    if not response.is_success:
+                        # Fall back to non-streaming
+                        logger.warning(f"[EC2] Streaming endpoint returned {response.status_code}, falling back")
+                        return await self.execute_tests(session_id, install_command, test_command, branch)
+
+                    async for raw_line in response.aiter_lines():
+                        if not raw_line.startswith("data: "):
+                            continue
+                        try:
+                            event = json.loads(raw_line[6:])
+                        except json.JSONDecodeError:
+                            continue
+
+                        event_type = event.get("type")
+
+                        if event_type == "log" and on_line:
+                            await on_line(event.get("phase", ""), event.get("line", ""))
+                        elif event_type == "result":
+                            result = event.get("data", {})
+                        elif event_type == "done":
+                            break
+
+        except (httpx.ConnectError, httpx.StreamError) as e:
+            logger.warning(f"[EC2] Streaming failed ({e}), falling back to blocking execute")
+            return await self.execute_tests(session_id, install_command, test_command, branch)
+
+        if not result:
+            logger.warning("[EC2] No result from streaming, falling back")
+            return await self.execute_tests(session_id, install_command, test_command, branch)
+
+        return result
+
     async def apply_fix(
         self,
         session_id: str,
@@ -168,7 +235,8 @@ class EC2Client:
         session_id: str,
         file_path: str,
         commit_message: str,
-        branch_name: str = "AI_Fix",
+        branch_name: str = "fix/greenbranch",
+        github_token: str | None = None,
     ) -> dict:
         """POST /api/v1/commit — create branch, commit, push."""
         payload = {
@@ -177,6 +245,8 @@ class EC2Client:
             "commit_message": commit_message,
             "branch_name": branch_name,
         }
+        if github_token:
+            payload["github_token"] = github_token
         url = f"{self.base_url}/api/v1/commit"
         _log_request("POST", url, payload=payload)
         t0 = time.monotonic()

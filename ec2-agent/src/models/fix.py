@@ -35,8 +35,11 @@ class CommitFixRequest(BaseModel):
         ..., description="Commit message (should start with [AI-AGENT])"
     )
     branch_name: str = Field(
-        default="AI_Fix",
-        description="Branch name (default: AI_Fix)"
+        default="fix/greenbranch",
+        description="Branch name (default: fix/greenbranch)"
+    )
+    github_token: str | None = Field(
+        default=None, description="GitHub OAuth token for authenticated push"
     )
 
 

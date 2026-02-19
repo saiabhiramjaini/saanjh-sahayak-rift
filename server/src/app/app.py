@@ -8,7 +8,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.app.config import api_settings
-from src.endpoints import health_router, agent_router
+from src.endpoints import health_router, agent_router, agent_ws_router, pr_router
 
 
 def _configure_logging() -> None:
@@ -77,5 +77,7 @@ def init_app() -> FastAPI:
     api_prefix = "/api/v1"
     app.include_router(health_router, prefix=api_prefix)
     app.include_router(agent_router, prefix=api_prefix)
+    app.include_router(agent_ws_router, prefix=api_prefix)
+    app.include_router(pr_router, prefix=api_prefix)
 
     return app

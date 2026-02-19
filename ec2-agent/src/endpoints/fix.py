@@ -60,8 +60,9 @@ async def commit_fix(request: CommitFixRequest):
     commit_hash = git_service.commit_and_push(
         session_id=request.session_id,
         file_path=request.file_path,
-        message=request.commit_message,
+        commit_message=request.commit_message,
         branch_name=request.branch_name,
+        github_token=request.github_token,
     )
 
     # Update session status in Redis

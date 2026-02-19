@@ -8,7 +8,7 @@ class ApiSettings(BaseSettings):
     """Main server settings."""
 
     # ── App metadata ──
-    app_name: str = Field(default="RIFT Agent Server", description="Application name")
+    app_name: str = Field(default="GreenBranch Server", description="Application name")
     version: str = Field(default="1.0.0", description="Application version")
     debug: bool = Field(default=False, description="Enable debug mode")
 

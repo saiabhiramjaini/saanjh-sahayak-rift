@@ -8,6 +8,7 @@ from src.endpoints import (
     health_router,
     session_router,
     execution_router,
+    streaming_execution_router,
     fix_router,
     files_router,
 )
@@ -65,6 +66,7 @@ def init_app() -> FastAPI:
     app.include_router(health_router, prefix=api_prefix)
     app.include_router(session_router, prefix=api_prefix)
     app.include_router(execution_router, prefix=api_prefix)
+    app.include_router(streaming_execution_router, prefix=api_prefix)
     app.include_router(fix_router, prefix=api_prefix)
     app.include_router(files_router, prefix=api_prefix)
 

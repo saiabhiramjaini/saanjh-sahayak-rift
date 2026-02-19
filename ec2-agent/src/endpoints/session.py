@@ -14,18 +14,19 @@ router = APIRouter(tags=["Session"])
 
 @router.post("/sessions", status_code=201)
 @handle_endpoint
-async def create_session(repo_url: str, language: str, user_id: str | None = None):
+async def create_session(repo_url: str, language: str, user_id: str | None = None, github_token: str | None = None):
     """Clone repo and create a new session.
 
     Args:
         repo_url: GitHub repository URL
         language: Project language (python or nodejs)
         user_id: Optional user identifier (email, username, etc.)
+        github_token: Optional GitHub OAuth token for private repo access
     """
     session_id = str(uuid.uuid4())
 
     git_service = GitService()
-    repo_path = git_service.clone_repo(repo_url, session_id)
+    repo_path = git_service.clone_repo(repo_url, session_id, github_token=github_token)
 
     session_data = {
         "session_id": session_id,
