@@ -23,10 +23,28 @@ class TestRunner:
         self.docker_service = DockerService()
 
     def run_tests(
-        self, repo_url: str, session_id: str, language: str, branch: str = "main"
+        self,
+        repo_url: str,
+        session_id: str,
+        language: str,
+        branch: str = "main",
+        install_command: str | None = None,
+        test_command: str | None = None,
     ) -> ExecuteTestsResponse:
         """Execute the full test pipeline.
 
+        Args:
+            repo_url: GitHub repository URL
+            session_id: Unique session identifier
+            language: "python" or "nodejs"
+            branch: Git branch to clone
+            install_command: Optional custom dependency install command
+            test_command: Optional custom test execution command
+
+        Returns:
+            ExecuteTestsResponse with test results
+
+        Pipeline:
         1. Clone the repository
         2. Install dependencies in Docker container
         3. Run tests in Docker container
@@ -50,6 +68,7 @@ class TestRunner:
         install_exit, install_output = self.docker_service.install_dependencies(
             language=language,
             repo_path=container_repo_path,
+            custom_command=install_command,
         )
         if install_exit != 0:
             logger.warning(f"Dependency install had issues: {install_output[:200]}")
@@ -59,6 +78,7 @@ class TestRunner:
         test_exit, test_output = self.docker_service.run_tests(
             language=language,
             repo_path=container_repo_path,
+            custom_command=test_command,
         )
 
         # 4. Parse output

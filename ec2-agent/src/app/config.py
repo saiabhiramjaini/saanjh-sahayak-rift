@@ -52,6 +52,16 @@ class ApiSettings(BaseSettings):
         description="Base path where cloned repos are stored on EC2",
     )
 
+    # ── Redis ──
+    redis_url: str = Field(
+        default="redis://localhost:6379/0",
+        description="Full Redis connection URL (redis://user:pass@host:port/db)",
+    )
+    session_ttl: int = Field(
+        default=7200,
+        description="Session TTL in seconds (default: 2 hours)",
+    )
+
     # ── Auth ──
     api_key: str = Field(
         default="",

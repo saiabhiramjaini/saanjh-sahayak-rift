@@ -76,27 +76,53 @@ class DockerService:
 
         return exit_code, output_str
 
-    def install_dependencies(self, language: str, repo_path: str) -> tuple[int, str]:
+    def install_dependencies(
+        self, language: str, repo_path: str, custom_command: str | None = None
+    ) -> tuple[int, str]:
         """Install project dependencies in the container.
 
-        repo_path should be the container-visible path (e.g., /repos/session_abc).
-        """
-        install_cmd = self.INSTALL_COMMANDS.get(language)
-        if install_cmd is None:
-            raise UnsupportedLanguageError(f"No install command for '{language}'")
+        Args:
+            language: "python" or "nodejs"
+            repo_path: Container-visible path (e.g., /repos/session_abc)
+            custom_command: Optional custom install command. If None, uses default.
 
-        logger.info(f"Installing dependencies for {language} at {repo_path}")
+        Returns:
+            Tuple of (exit_code, output_string)
+        """
+        if custom_command:
+            install_cmd = custom_command + " 2>&1"
+            logger.info(f"Using custom install command: {install_cmd[:100]}")
+        else:
+            install_cmd = self.INSTALL_COMMANDS.get(language)
+            if install_cmd is None:
+                raise UnsupportedLanguageError(f"No install command for '{language}'")
+            logger.info(f"Using default install for {language}")
+
+        logger.info(f"Installing dependencies at {repo_path}")
         return self.exec_command(language, install_cmd, repo_path)
 
-    def run_tests(self, language: str, repo_path: str) -> tuple[int, str]:
+    def run_tests(
+        self, language: str, repo_path: str, custom_command: str | None = None
+    ) -> tuple[int, str]:
         """Run tests in the container.
 
-        Returns (exit_code, raw_test_output).
-        exit_code 0 = all passed, non-zero = failures.
-        """
-        test_cmd = self.TEST_COMMANDS.get(language)
-        if test_cmd is None:
-            raise UnsupportedLanguageError(f"No test command for '{language}'")
+        Args:
+            language: "python" or "nodejs"
+            repo_path: Container-visible path (e.g., /repos/session_abc)
+            custom_command: Optional custom test command. If None, uses default.
 
-        logger.info(f"Running tests for {language} at {repo_path}")
+        Returns:
+            Tuple of (exit_code, raw_test_output)
+            exit_code 0 = all passed, non-zero = failures.
+        """
+        if custom_command:
+            test_cmd = custom_command + " 2>&1"
+            logger.info(f"Using custom test command: {test_cmd[:100]}")
+        else:
+            test_cmd = self.TEST_COMMANDS.get(language)
+            if test_cmd is None:
+                raise UnsupportedLanguageError(f"No test command for '{language}'")
+            logger.info(f"Using default test runner for {language}")
+
+        logger.info(f"Running tests at {repo_path}")
         return self.exec_command(language, test_cmd, repo_path)

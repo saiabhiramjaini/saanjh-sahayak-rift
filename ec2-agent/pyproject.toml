@@ -10,5 +10,6 @@ dependencies = [
     "gitpython>=3.1.46",
     "httpx>=0.28.1",
     "pydantic-settings>=2.13.0",
+    "redis[hiredis]>=5.0.0",
     "uvicorn[standard]>=0.41.0",
 ]

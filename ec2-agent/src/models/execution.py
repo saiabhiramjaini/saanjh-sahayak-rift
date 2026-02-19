@@ -18,18 +18,27 @@ class TestError(BaseModel):
 class ExecuteTestsRequest(BaseModel):
     """Request body for POST /execute-tests."""
 
-    repo_url: str = Field(..., description="GitHub repository URL to clone")
     session_id: str = Field(..., min_length=1, max_length=100, description="Unique session identifier")
-    language: str = Field(..., description="Project language: python or nodejs")
-    branch: str = Field(default="main", description="Branch to clone")
+    branch: str | None = Field(
+        default=None,
+        description="Branch to test (optional). Uses session's original branch if not provided."
+    )
+    install_command: str | None = Field(
+        default=None,
+        description="Custom dependency installation command (optional). Uses smart defaults if not provided."
+    )
+    test_command: str | None = Field(
+        default=None,
+        description="Custom test execution command (optional). Uses smart defaults if not provided."
+    )
 
     class Config:
         json_schema_extra = {
             "example": {
-                "repo_url": "https://github.com/user/repo",
                 "session_id": "abc123",
-                "language": "python",
                 "branch": "main",
+                "install_command": "uv pip install -r requirements.txt",
+                "test_command": "uv run pytest -v",
             }
         }
 

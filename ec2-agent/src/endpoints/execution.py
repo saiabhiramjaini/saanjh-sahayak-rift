@@ -3,7 +3,7 @@ from fastapi import APIRouter
 from src.app.handlers import handle_endpoint
 from src.models import ExecuteTestsRequest
 from src.services.test_runner import TestRunner
-from src.endpoints.session import sessions
+from src.services.session_store import session_store
 
 router = APIRouter(tags=["Execution"])
 
@@ -12,27 +12,30 @@ router = APIRouter(tags=["Execution"])
 @handle_endpoint
 async def execute_tests(request: ExecuteTestsRequest):
     """Run tests for a session."""
-    from src.core.exceptions import SessionNotFoundError
-
-    # Validate session exists
-    if request.session_id not in sessions:
-        raise SessionNotFoundError(request.session_id)
-
-    session = sessions[request.session_id]
+    # Validate session exists (raises SessionNotFoundError if missing)
+    session = session_store.get(request.session_id)
 
     # Update session status
-    session["status"] = "running"
+    session_store.update(request.session_id, {"status": "running"})
+
+    # Pull metadata from session
+    repo_url = session["repo_url"]
+    language = session["language"]
+    branch = request.branch or "main"  # Use provided branch or default
 
     # Run tests via TestRunner
     test_runner = TestRunner()
     result = test_runner.run_tests(
-        repo_url=request.repo_url,
+        repo_url=repo_url,
         session_id=request.session_id,
-        language=request.language,
-        branch=request.branch,
+        language=language,
+        branch=branch,
+        install_command=request.install_command,
+        test_command=request.test_command,
     )
 
     # Update session status based on result
-    session["status"] = "completed" if result.status == "success" else "failed"
+    new_status = "completed" if result.status == "success" else "failed"
+    session_store.update(request.session_id, {"status": new_status})
 
     return result

@@ -3,7 +3,7 @@ from fastapi import APIRouter
 from src.app.handlers import handle_endpoint
 from src.models import ApplyFixRequest
 from src.services.git_service import GitService
-from src.endpoints.session import sessions
+from src.services.session_store import session_store
 
 router = APIRouter(tags=["Fix"])
 
@@ -12,12 +12,8 @@ router = APIRouter(tags=["Fix"])
 @handle_endpoint
 async def apply_fix(request: ApplyFixRequest):
     """Apply an AI-generated fix to the repo."""
-    from src.core.exceptions import SessionNotFoundError
-
-    if request.session_id not in sessions:
-        raise SessionNotFoundError(request.session_id)
-
-    session = sessions[request.session_id]
+    # Validate session exists (raises SessionNotFoundError if missing)
+    session = session_store.get(request.session_id)
 
     git_service = GitService()
 
@@ -35,8 +31,8 @@ async def apply_fix(request: ApplyFixRequest):
         branch_name=request.branch_name,
     )
 
-    # Update session
-    session["status"] = "fixed"
+    # Update session status in Redis
+    session_store.update(request.session_id, {"status": "fixed"})
 
     return {
         "success": True,

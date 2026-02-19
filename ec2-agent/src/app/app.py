@@ -25,9 +25,17 @@ async def lifespan(app: FastAPI):
     docker.ping()
     print("Docker daemon connected")
 
+    # Verify Redis connectivity on startup
+    from src.services.session_store import session_store
+    session_store.ping()
+    print(f"Redis connected (TTL={api_settings.session_ttl}s)")
+
     yield  # App is running
 
     # --- Shutdown ---
+    from src.services.session_store import session_store as _store
+    _store.close()
+    print("Redis connection closed")
     print("Shutting down...")
 
 
