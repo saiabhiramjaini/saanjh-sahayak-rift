@@ -37,17 +37,17 @@ class ApiSettings(BaseSettings):
         description="API key for authenticating with EC2 agent",
     )
 
-    # ── LLM ──
-    together_api_key: str = Field(
+    # ── LLM (Groq) ──
+    groq_api_key: str = Field(
         default="",
-        description="Together AI API key",
+        description="Groq API key",
     )
     llm_model: str = Field(
-        default="deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct",
-        description="Together AI model name",
+        default="llama-3.3-70b-versatile",
+        description="Groq model name",
     )
-    llm_max_tokens: int = Field(default=1500, description="Max tokens per LLM call")
-    llm_temperature: float = Field(default=0.0, description="LLM temperature")
+    llm_max_tokens: int = Field(default=4096, description="Max tokens per LLM call")
+    llm_temperature: float = Field(default=0.2, description="LLM temperature")
 
     # ── Agent ──
     max_iterations: int = Field(

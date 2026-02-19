@@ -7,25 +7,30 @@ class GraphState(TypedDict):
     """State schema for the healing graph."""
 
     # ── Session ──
-    session_id: str          # EC2 agent session ID
-    repo_url: str            # GitHub repository URL
-    language: str            # python or nodejs
-    branch: str              # Git branch (e.g. "main")
+    session_id: str
+    repo_url: str
+    language: str
+    branch: str
+
+    # ── Team ──
+    team_name: str
+    team_leader_name: str
+    branch_name: str  # TEAM_NAME_LEADER_AI_Fix
 
     # ── Test execution ──
-    install_command: str | None   # Optional custom install command
-    test_command: str | None      # Optional custom test command
-    errors: list[dict[str, Any]]  # Test errors from last run
-    passed: bool                  # Whether all tests pass
+    install_command: str | None
+    test_command: str | None
+    errors: list[dict[str, Any]]
+    passed: bool
 
     # ── Iteration control ──
-    current_error: dict[str, Any] | None  # Error currently being fixed
-    iteration: int                         # Current iteration (0-indexed)
-    max_iterations: int                    # Stop after this many iterations
+    current_error: dict[str, Any] | None
+    iteration: int
+    max_iterations: int
 
-    # ── Commit ──
-    auto_commit: bool           # Whether to commit fixes after completion
-    commit_message: str         # Commit message
-    branch_name: str            # Branch name for the fix
-    fixed_files: list[str]      # Files modified during this run
-    commit_hash: str | None     # Set after successful commit
+    # ── Tracking (for dashboard) ──
+    fixes_applied: list[dict[str, Any]]      # FixApplied dicts
+    ci_timeline: list[dict[str, Any]]        # CITimelineEntry dicts
+    total_failures_detected: int             # Total unique failures found
+    fixed_files: list[str]
+    commit_hash: str | None

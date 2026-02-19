@@ -1,9 +1,16 @@
-"""Agent run endpoint."""
+"""Agent run endpoint — triggers the full healing pipeline."""
 
 from fastapi import APIRouter
 
 from src.app.handlers import handle_endpoint
-from src.models import AgentRunRequest, AgentRunResponse
+from src.models import (
+    AgentRunRequest,
+    AgentRunResponse,
+    FixApplied,
+    CITimelineEntry,
+    ScoreBreakdown,
+    RunSummary,
+)
 from src.runner.agent_runner import run_agent
 
 router = APIRouter(tags=["Agent"])
@@ -13,37 +20,32 @@ router = APIRouter(tags=["Agent"])
 @handle_endpoint
 async def agent_run(request: AgentRunRequest) -> AgentRunResponse:
     """
-    Clone a GitHub repo into an EC2 session, run the healing graph,
-    and (optionally) commit fixes to a new branch.
+    Clone a GitHub repo, run the LangGraph healing loop,
+    commit fixes to TEAM_NAME_LEADER_AI_Fix branch,
+    and return comprehensive dashboard data.
     """
     result = await run_agent(
         repo_url=request.repo_url,
         language=request.language,
-        user_id=request.user_id,
+        team_name=request.team_name,
+        team_leader_name=request.team_leader_name,
         install_command=request.install_command,
         test_command=request.test_command,
         branch=request.branch,
         max_iterations=request.max_iterations,
-        auto_commit=request.auto_commit,
-        commit_message=request.commit_message,
-        branch_name=request.branch_name,
     )
-
-    if result["passed"]:
-        message = "All tests are passing."
-        status = "passed"
-    else:
-        remaining = len(result["errors_remaining"])
-        message = f"Max iterations reached. {remaining} error(s) remain."
-        status = "partial_fix" if result["commit_hash"] else "failed"
 
     return AgentRunResponse(
         session_id=result["session_id"],
-        status=status,
+        status=result["status"],
         passed=result["passed"],
         iterations=result["iterations"],
-        errors_remaining=result["errors_remaining"],
+        message=result["message"],
+        run_summary=RunSummary(**result["run_summary"]),
+        score_breakdown=ScoreBreakdown(**result["score_breakdown"]),
+        fixes_applied=[FixApplied(**f) for f in result["fixes_applied"]],
+        ci_timeline=[CITimelineEntry(**e) for e in result["ci_timeline"]],
         commit_hash=result.get("commit_hash"),
         branch_name=result.get("branch_name"),
-        message=message,
+        errors_remaining=result.get("errors_remaining", []),
     )

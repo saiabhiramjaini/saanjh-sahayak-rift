@@ -18,11 +18,15 @@ async def lifespan(app: FastAPI):
     print(f"LLM Model: {api_settings.llm_model}")
     print(f"Max iterations: {api_settings.max_iterations}")
 
-    # Verify EC2 agent is reachable
+    # Verify EC2 agent is reachable (soft check — don't crash if it's down)
     from src.services.ec2_client import EC2Client
     client = EC2Client()
-    await client.ping()
-    print("EC2 agent reachable")
+    try:
+        await client.ping()
+        print("EC2 agent reachable ✓")
+    except Exception as e:
+        print(f"WARNING: EC2 agent not reachable at {api_settings.ec2_agent_url} — {e}")
+        print("The server will start, but agent runs will fail until the EC2 agent is up.")
 
     yield  # App is running
 

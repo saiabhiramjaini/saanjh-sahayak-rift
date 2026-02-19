@@ -3,7 +3,7 @@
 from src.state.graph_state import GraphState
 
 
-def select_error(state: GraphState) -> GraphState:
+async def select_error(state: GraphState) -> GraphState:
     """Set current_error to the first error in the list."""
 
     if state["passed"] or not state["errors"]:

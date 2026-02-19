@@ -1,24 +1,24 @@
-"""LLM client — Together AI for code repair."""
+"""LLM client — Groq for code repair."""
 
 import logging
 
-from together import Together
+from groq import Groq
 
 from src.app.config import api_settings
 from src.core.exceptions import LLMError
 
 logger = logging.getLogger("rift_server")
 
-_client: Together | None = None
+_client: Groq | None = None
 
 
-def _get_client() -> Together:
-    """Lazy-initialised Together AI client."""
+def _get_client() -> Groq:
+    """Lazy-initialised Groq client."""
     global _client
     if _client is None:
-        if not api_settings.together_api_key:
-            raise LLMError("SERVER_TOGETHER_API_KEY is not set — cannot call LLM")
-        _client = Together(api_key=api_settings.together_api_key)
+        if not api_settings.groq_api_key:
+            raise LLMError("SERVER_GROQ_API_KEY is not set — cannot call LLM")
+        _client = Groq(api_key=api_settings.groq_api_key)
     return _client
 
 
@@ -27,7 +27,9 @@ def _clean_output(text: str) -> str:
     text = text.strip()
     if text.startswith("```"):
         lines = text.split("\n")
+        # Remove first line (```python etc.)
         lines = lines[1:]
+        # Remove closing ```
         if lines and lines[-1].strip() == "```":
             lines = lines[:-1]
         text = "\n".join(lines)
@@ -36,7 +38,7 @@ def _clean_output(text: str) -> str:
 
 def ask_llm(prompt: str) -> str:
     """
-    Send a code-repair prompt to the LLM and return the fixed code.
+    Send a code-repair prompt to Groq LLM and return the fixed code.
 
     Raises LLMError on failure.
     """
@@ -51,7 +53,8 @@ def ask_llm(prompt: str) -> str:
                     "content": (
                         "You are a senior software engineer fixing CI test failures. "
                         "Return ONLY the complete corrected file contents. "
-                        "Do not include any explanation, markdown, or code fences."
+                        "Do not include any explanation, markdown fences, or commentary. "
+                        "Just the raw code."
                     ),
                 },
                 {"role": "user", "content": prompt},
