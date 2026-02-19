@@ -47,7 +47,8 @@ def _stream_execution(
             branch=branch,
         )
 
-    container_repo_path = os.path.join("/repos", session_id)
+    from src.app.config import api_settings
+    container_repo_path = os.path.join(api_settings.container_repos_path, session_id)
 
     # ── Install ──────────────────────────────────────────────────────────
     yield _sse_event({"type": "phase", "phase": "install"})

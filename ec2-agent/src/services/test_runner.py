@@ -62,8 +62,8 @@ class TestRunner:
                 branch=branch,
             )
 
-        # Container sees repos at /repos/ (volume mount)
-        container_repo_path = os.path.join("/repos", session_id)
+        # Container sees repos at whatever path was configured internally
+        container_repo_path = os.path.join(api_settings.container_repos_path, session_id)
 
         # 2. Install dependencies
         logger.info(f"Installing dependencies for {language}")

@@ -49,7 +49,11 @@ class ApiSettings(BaseSettings):
     # ── Paths ──
     repos_base_path: str = Field(
         default="/home/ubuntu/repos",
-        description="Base path where cloned repos are stored on EC2",
+        description="Base path where cloned repos are stored on EC2 (Host side)",
+    )
+    container_repos_path: str = Field(
+        default="/repos",
+        description="Path where repos are mounted inside the executor containers",
     )
 
     # ── Redis ──
