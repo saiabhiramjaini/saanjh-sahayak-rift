@@ -164,15 +164,15 @@ export default function Dashboard() {
     // Create a temporary repo object for URL mode
     const effectiveRepo = inputMode === "url"
       ? {
-          id: Date.now(),
-          name: repoUrl.split("/").pop() || "repository",
-          full_name: repoUrl.replace("https://github.com/", ""),
-          private: false,
-          html_url: repoUrl.trim(),
-          description: null,
-          updated_at: new Date().toISOString(),
-          language: null,
-        }
+        id: Date.now(),
+        name: repoUrl.split("/").pop() || "repository",
+        full_name: repoUrl.replace("https://github.com/", ""),
+        private: false,
+        html_url: repoUrl.trim(),
+        description: null,
+        updated_at: new Date().toISOString(),
+        language: null,
+      }
       : selectedRepo;
 
     if (!effectiveRepo) return;
@@ -438,24 +438,26 @@ export default function Dashboard() {
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-52 glass-card rounded-xl border-border/50">
-                  <div className="px-3 py-2">
-                    <p className="text-sm font-medium text-foreground">{session.user?.name}</p>
-                    <p className="text-xs text-muted-foreground">{session.user?.email}</p>
+                <DropdownMenuContent align="end" className="w-56 glass-card rounded-xl border-border/50 overflow-hidden">
+                  <div className="px-3 py-3 bg-primary/5 border-b border-border/50">
+                    <p className="text-sm font-semibold text-foreground leading-tight">{session.user?.name}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5 truncate">{session.user?.email}</p>
                   </div>
-                  <DropdownMenuSeparator className="bg-border/50" />
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard" className="flex items-center gap-2">
-                      <User className="h-3.5 w-3.5" /> Dashboard
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-border/50" />
-                  <DropdownMenuItem
-                    onClick={() => signOut({ callbackUrl: "/" })}
-                    className="flex items-center gap-2 text-destructive focus:text-destructive"
-                  >
-                    <LogOut className="h-3.5 w-3.5" /> Sign out
-                  </DropdownMenuItem>
+                  <div className="p-1">
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard" className="flex items-center gap-2 rounded-lg">
+                        <User className="h-3.5 w-3.5" /> Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                  </div>
+                  <div className="p-1 pt-0">
+                    <DropdownMenuItem
+                      onClick={() => signOut({ callbackUrl: "/" })}
+                      className="flex items-center gap-2 rounded-lg font-medium bg-destructive/10 text-destructive hover:!bg-destructive hover:!text-destructive-foreground focus:bg-destructive focus:text-destructive-foreground transition-colors"
+                    >
+                      <LogOut className="h-3.5 w-3.5" /> Sign out
+                    </DropdownMenuItem>
+                  </div>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
@@ -476,7 +478,7 @@ export default function Dashboard() {
             <div className="flex items-center justify-between">
               <div className="space-y-1">
                 <h1 className="text-2xl font-semibold tracking-tight text-foreground">Projects</h1>
-                <p className="text-sm text-muted-foreground">Enter repository details or select from your GitHub repos.</p>
+                <p className="text-sm text-muted-foreground">Enter your repository URL and team details to start the AI healing pipeline.</p>
               </div>
             </div>
 
@@ -528,163 +530,153 @@ export default function Dashboard() {
               )}
             </div>
 
-            {/* Input Mode Toggle - only show if authenticated */}
-            {session && (
-              <div className="flex items-center gap-2">
-                <Button
-                  variant={inputMode === "url" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setInputMode("url")}
-                  className="gap-2"
-                >
-                  <LinkIcon className="h-3.5 w-3.5" /> Enter URL
-                </Button>
-                <Button
-                  variant={inputMode === "select" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setInputMode("select")}
-                  className="gap-2"
-                >
-                  <GitHubIcon className="h-3.5 w-3.5" /> Select from GitHub
-                </Button>
-              </div>
-            )}
-
-            {/* URL Input Mode */}
-            {inputMode === "url" && (
-              <div className="glass-card rounded-2xl p-6 space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-foreground flex items-center gap-1.5">
-                    <LinkIcon className="h-3 w-3" /> GitHub Repository URL
-                  </label>
-                  <p className="text-xs text-muted-foreground">Paste the full URL of the repository to analyze</p>
-                  <Input
-                    placeholder="https://github.com/username/repository"
-                    value={repoUrl}
-                    onChange={(e) => setRepoUrl(e.target.value)}
-                    className="bg-secondary/30 font-mono text-sm"
-                    spellCheck={false}
-                  />
+            {/* Repository URL Input — always visible (URL mode is the primary flow) */}
+            <div className="glass-card rounded-2xl p-6 space-y-5">
+              <div className="flex items-center gap-2 border-b border-border/50 pb-4">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 border border-primary/20">
+                  <LinkIcon className="h-4 w-4 text-primary" />
                 </div>
-
-                {/* Language Selector */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-foreground">Project Language</label>
-                  <p className="text-xs text-muted-foreground">Select the primary language of your project</p>
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant={selectedLanguage === "nodejs" ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setSelectedLanguage("nodejs")}
-                      className="flex-1"
-                    >
-                      JavaScript / TypeScript
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={selectedLanguage === "python" ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setSelectedLanguage("python")}
-                      className="flex-1"
-                    >
-                      Python
-                    </Button>
-                  </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-foreground">Repository</p>
+                  <p className="text-xs text-muted-foreground">Paste the full GitHub URL to analyze</p>
                 </div>
-
-                <Button
-                  onClick={handleClone}
-                  disabled={!repoUrl.trim() || !teamName.trim() || !teamLeaderName.trim()}
-                  className="w-full gap-2 rounded-xl transition-all duration-300 hover:shadow-[0_0_20px_rgba(74,222,128,0.2)]"
-                >
-                  <Play className="h-4 w-4" /> Analyze Repository
-                </Button>
-
-                {(!teamName.trim() || !teamLeaderName.trim()) && repoUrl.trim() && (
-                  <p className="text-xs text-amber-500 flex items-center gap-1.5">
-                    <AlertCircle className="h-3 w-3" /> Please fill in team name and leader name above
-                  </p>
+                {/* GitHub repos toggle — only for authenticated users */}
+                {session && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setInputMode(inputMode === "select" ? "url" : "select")}
+                    className="gap-2 h-8 text-xs border border-border/60 hover:border-primary/40 hover:bg-primary/5"
+                  >
+                    <GitHubIcon className="h-3.5 w-3.5" />
+                    {inputMode === "select" ? "Enter URL" : "My Repos"}
+                  </Button>
                 )}
               </div>
-            )}
 
-            {/* Select from GitHub Mode */}
-            {inputMode === "select" && (
-              <>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    placeholder="Search repositories..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="bg-secondary/30 pl-9"
-                  />
-                </div>
-
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {loading ? (
-                    Array.from({ length: 6 }).map((_, i) => (
-                      <div key={i} className="animate-pulse">
-                        <RepoCardSkeleton />
+              {inputMode === "select" ? (
+                /* GitHub repos picker */
+                <div className="space-y-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      placeholder="Search repositories…"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="bg-secondary/30 pl-9"
+                    />
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2 max-h-96 overflow-y-auto pr-1">
+                    {loading ? (
+                      Array.from({ length: 4 }).map((_, i) => (
+                        <div key={i} className="animate-pulse"><RepoCardSkeleton /></div>
+                      ))
+                    ) : filteredRepos.length === 0 ? (
+                      <div className="col-span-2 py-12 text-center text-sm text-muted-foreground">
+                        {searchQuery ? "No repositories match your search" : "No repositories found"}
                       </div>
-                    ))
-                  ) : filteredRepos.length === 0 ? (
-                    <div className="col-span-2 py-16 text-center text-sm text-muted-foreground">
-                      {searchQuery ? "No repositories match your search" : "No repositories found"}
-                    </div>
-                  ) : (
-                    filteredRepos.map((repo) => (
-                      <RepoCard
-                        key={repo.id}
-                        repo={repo}
-                        onSelect={() => setSelectedRepo(selectedRepo?.id === repo.id ? null : repo)}
-                        isSelected={selectedRepo?.id === repo.id}
-                        disabled={false}
-                      />
-                    ))
-                  )}
-                </div>
-
-                {selectedRepo && (
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-2.5 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3.5 backdrop-blur-sm flex-1">
-                      <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 border border-primary/20">
-                        <GitBranch className="h-3.5 w-3.5 text-primary" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Will create branch</p>
-                        <code className="text-xs font-medium text-primary">
+                    ) : (
+                      filteredRepos.map((repo) => (
+                        <RepoCard
+                          key={repo.id}
+                          repo={repo}
+                          onSelect={() => setSelectedRepo(selectedRepo?.id === repo.id ? null : repo)}
+                          isSelected={selectedRepo?.id === repo.id}
+                          disabled={false}
+                        />
+                      ))
+                    )}
+                  </div>
+                  {selectedRepo && (
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 flex-1 min-w-0">
+                        <GitBranch className="h-3.5 w-3.5 shrink-0 text-primary" />
+                        <code className="text-xs font-medium text-primary truncate">
                           {teamName && teamLeaderName
                             ? getTeamBranchName(teamName, teamLeaderName)
                             : getBranchName(selectedRepo.name)}
                         </code>
                       </div>
+                      <Button
+                        onClick={handleClone}
+                        disabled={!selectedRepo || !teamName.trim() || !teamLeaderName.trim()}
+                        className="gap-2 shrink-0 rounded-xl transition-all duration-300 hover:shadow-[0_0_20px_rgba(74,222,128,0.2)]"
+                      >
+                        Run GreenBranch <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                  {selectedRepo && (!teamName.trim() || !teamLeaderName.trim()) && (
+                    <p className="text-xs text-amber-500 flex items-center gap-1.5">
+                      <AlertCircle className="h-3 w-3" /> Please fill in team name and leader name above
+                    </p>
+                  )}
+                </div>
+              ) : (
+                /* URL input mode */
+                <div className="space-y-4">
+                  {/* URL + Run button on same row */}
+                  <div className="flex items-center gap-2">
+                    <div className="relative flex-1">
+                      <LinkIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        placeholder="https://github.com/username/repository"
+                        value={repoUrl}
+                        onChange={(e) => setRepoUrl(e.target.value)}
+                        className="bg-secondary/30 font-mono text-sm pl-10 pr-3"
+                        spellCheck={false}
+                      />
                     </div>
                     <Button
                       onClick={handleClone}
-                      disabled={!selectedRepo || !teamName.trim() || !teamLeaderName.trim()}
-                      className="gap-2 rounded-xl px-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(74,222,128,0.2)]"
+                      disabled={!repoUrl.trim() || !teamName.trim() || !teamLeaderName.trim()}
+                      className="shrink-0 gap-2 rounded-xl transition-all duration-300 hover:shadow-[0_0_20px_rgba(74,222,128,0.2)] whitespace-nowrap"
                     >
-                      Run GreenBranch <ChevronRight className="h-4 w-4" />
+                      <Play className="h-4 w-4" /> Run GreenBranch
                     </Button>
                   </div>
-                )}
 
-                {selectedRepo && (!teamName.trim() || !teamLeaderName.trim()) && (
-                  <p className="text-xs text-amber-500 flex items-center gap-1.5">
-                    <AlertCircle className="h-3 w-3" /> Please fill in team name and leader name above
-                  </p>
-                )}
-              </>
-            )}
+                  {/* Language Selector */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-muted-foreground">Project Language</label>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant={selectedLanguage === "nodejs" ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setSelectedLanguage("nodejs")}
+                        className="flex-1 text-xs"
+                      >
+                        JavaScript / TypeScript
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={selectedLanguage === "python" ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setSelectedLanguage("python")}
+                        className="flex-1 text-xs"
+                      >
+                        Python
+                      </Button>
+                    </div>
+                  </div>
+
+                  {(!teamName.trim() || !teamLeaderName.trim()) && repoUrl.trim() && (
+                    <p className="text-xs text-amber-500 flex items-center gap-1.5">
+                      <AlertCircle className="h-3 w-3" /> Fill in team name and leader name to continue
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
         {/* ─────────── CONFIGURE ─────────── */}
         {phase === "configure" && selectedRepo && (
           <div className="space-y-6">
-            <div className="flex items-start justify-between">
+            {/* Header: title + Run CI button top-right */}
+            <div className="flex items-start justify-between gap-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2.5">
                   <CheckCircle2 className="h-5 w-5 text-primary" />
@@ -692,30 +684,39 @@ export default function Dashboard() {
                 </div>
                 <p className="text-sm text-muted-foreground">{selectedRepo.full_name}</p>
               </div>
-              <button onClick={resetAnalysis} className="text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
-                Cancel
-              </button>
+              <div className="flex items-center gap-3 shrink-0">
+                <Button
+                  onClick={handleExecute}
+                  disabled={!installCommand.trim() || !testCommand.trim()}
+                  className="gap-2 rounded-xl px-5 transition-all duration-300 hover:shadow-[0_0_20px_rgba(74,222,128,0.3)]"
+                >
+                  <Play className="h-4 w-4" /> Run CI
+                </Button>
+                <button onClick={resetAnalysis} className="text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
+                  Cancel
+                </button>
+              </div>
             </div>
 
             <div className="glass-card space-y-5 rounded-2xl p-6">
               <div className="flex items-center gap-2 border-b border-border/50 pb-4">
-                {/* Terminal icon is now handled in BuildLogTerminal component */}
                 <p className="text-sm font-medium text-foreground">Configure commands</p>
                 <span className="ml-auto rounded-full border border-primary/20 bg-primary/5 px-2.5 py-0.5 text-xs text-primary">
                   {inputMode === "url" ? selectedLanguage : mapLanguage(selectedRepo.language ?? null)}
                 </span>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-foreground">Install command</label>
-                <p className="text-xs text-muted-foreground">How to install project dependencies</p>
-                <Input value={installCommand} onChange={(e) => setInstallCommand(e.target.value)} placeholder="npm install" className="mt-1 font-mono text-sm" spellCheck={false} />
-              </div>
-              {/* Separator is not needed, removed for modularization */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-foreground">Test command</label>
-                <p className="text-xs text-muted-foreground">Command that runs your test suite</p>
-                <Input value={testCommand} onChange={(e) => setTestCommand(e.target.value)} placeholder="npm test" className="mt-1 font-mono text-sm" spellCheck={false} />
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-foreground">Install command</label>
+                  <p className="text-xs text-muted-foreground">Install project dependencies</p>
+                  <Input value={installCommand} onChange={(e) => setInstallCommand(e.target.value)} placeholder="npm install" className="mt-1 font-mono text-sm bg-secondary/30" spellCheck={false} />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-foreground">Test command</label>
+                  <p className="text-xs text-muted-foreground">Run your test suite</p>
+                  <Input value={testCommand} onChange={(e) => setTestCommand(e.target.value)} placeholder="npm test" className="mt-1 font-mono text-sm bg-secondary/30" spellCheck={false} />
+                </div>
               </div>
             </div>
 
@@ -732,12 +733,6 @@ export default function Dashboard() {
             </div>
 
             {logs.length > 0 && <BuildLogTerminal logs={logs} isStreaming={false} />}
-
-            <div className="flex justify-end">
-              <Button onClick={handleExecute} disabled={!installCommand.trim() || !testCommand.trim()} className="gap-2 rounded-xl px-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(74,222,128,0.2)]">
-                <Play className="h-4 w-4" /> Run Tests
-              </Button>
-            </div>
           </div>
         )}
 

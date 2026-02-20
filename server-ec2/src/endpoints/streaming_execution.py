@@ -81,39 +81,37 @@ def _stream_execution(
     yield _sse_event({"type": "phase", "phase": "test"})
 
     test_lines: list[str] = []
-    test_exit = -1
+    test_exit = 0
+    full_test_output = ""
     try:
         gen = docker_service.run_tests_streaming(
             language=language,
             repo_path=container_repo_path,
             custom_command=test_command,
         )
-        for line in gen:
-            test_lines.append(line)
-            yield _sse_event({"type": "log", "phase": "test", "line": line})
+        # Manually drive the generator so we can capture its return value
+        # (exit_code, full_output) which is set via `return` inside the generator.
+        try:
+            while True:
+                line = next(gen)
+                test_lines.append(line)
+                yield _sse_event({"type": "log", "phase": "test", "line": line})
+        except StopIteration as stop:
+            if stop.value:
+                test_exit, full_test_output = stop.value
+            else:
+                test_exit = 0
+                full_test_output = "\n".join(test_lines)
     except Exception as e:
         logger.warning(f"Test streaming failed, falling back: {e}")
-        test_exit, test_output = docker_service.run_tests(
+        test_exit, full_test_output = docker_service.run_tests(
             language=language,
             repo_path=container_repo_path,
             custom_command=test_command,
         )
-        for line in test_output.strip().split("\n"):
+        for line in full_test_output.strip().split("\n"):
             test_lines.append(line)
             yield _sse_event({"type": "log", "phase": "test", "line": line})
-
-    # Get exit code from the generator if we didn't fallback
-    if test_exit == -1:
-        # Re-run non-streaming to get exit code + proper parse
-        # (generator return value isn't easily accessible from the for loop)
-        test_exit_val, full_test_output = docker_service.run_tests(
-            language=language,
-            repo_path=container_repo_path,
-            custom_command=test_command,
-        )
-        test_exit = test_exit_val
-    else:
-        full_test_output = "\n".join(test_lines)
 
     # Parse errors
     errors = parse_test_output(full_test_output, language)

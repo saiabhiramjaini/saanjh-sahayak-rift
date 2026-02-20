@@ -2,7 +2,7 @@
 
 import {
   AlertDialog,
-  AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -239,12 +239,9 @@ export function PRSuccessAlertDialog({
         </div>
 
         <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-          <AlertDialogAction
-            onClick={() => onOpenChange(false)}
-            className="sm:order-1 bg-secondary text-foreground hover:bg-secondary/80"
-          >
+          <AlertDialogCancel className="sm:order-1">
             Close
-          </AlertDialogAction>
+          </AlertDialogCancel>
           <Button
             onClick={() => window.open(prUrl, "_blank")}
             className="gap-2 sm:order-2"

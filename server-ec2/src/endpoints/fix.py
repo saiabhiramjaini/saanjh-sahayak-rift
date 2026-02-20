@@ -27,7 +27,7 @@ async def apply_fix(request: ApplyFixRequest):
         repo_url=session["repo_url"],
         session_id=request.session_id,
         language=session["language"],
-        branch="main",  # Not switching branches, just testing current state
+        branch=session.get("branch", "main"),  # Use session branch, not a hardcoded value
         install_command=request.install_command,
         test_command=request.test_command,
     )
